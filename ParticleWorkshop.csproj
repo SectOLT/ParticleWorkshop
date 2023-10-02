@@ -1,36 +1,49 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net4.7.2</TargetFramework>
+    <TargetFramework>net462</TargetFramework>
     <RootNamespace>ParticleWorkshop</RootNamespace>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <LangVersion>preview</LangVersion>
     <AssemblyName>ParticleWorkshop</AssemblyName>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+    <ResonitePath>$(MSBuildThisFileDirectory)Resonite</ResonitePath>
+    <ResonitePath Condition="Exists('C:\Program Files (x86)\Steam\steamapps\common\Resonite\')">C:\Program Files (x86)\Steam\steamapps\common\Resonite\</ResonitePath>
+    <ResonitePath Condition="Exists('$(HOME)/.steam/steam/steamapps/common/Resonite/')">$(HOME)/.steam/steam/steamapps/common/Resonite/</ResonitePath>
+    <ResonitePath Condition="Exists('D:/SteamLibrary/steamapps/common/Resonite/')">D:/SteamLibrary/steamapps/common/Resonite/</ResonitePath>
+    <ResonitePath Condition="Exists('E:/SteamLibrary/steamapps/common/Resonite/')">E:/SteamLibrary/steamapps/common/Resonite/</ResonitePath>
+    <CopyLocal>false</CopyLocal>
+    <CopyToMods Condition="'$(CopyToMods)'==''">true</CopyToMods>
+    <DebugSymbols Condition="'$(Configuration)'=='Release'">false</DebugSymbols>
+    <DebugType Condition="'$(Configuration)'=='Release'">None</DebugType>
+    <Version>1.1.0</Version>
+    <Authors>Gareth48, Cyro, badhaloninja, TheJebForge</Authors>
+    <PackageId>ParticleWorkshop</PackageId>
   </PropertyGroup>
 
 
   <ItemGroup>
     <Reference Include="0Harmony">
-      <HintPath>SymlinkedLibraries\0Harmony.dll</HintPath>
-    </Reference>
-    <Reference Include="BaseX">
-      <HintPath>SymlinkedLibraries\BaseX.dll</HintPath>
-    </Reference>
-    <Reference Include="CodeX">
-      <HintPath>SymlinkedLibraries\CodeX.dll</HintPath>
+      <HintPath>$(ResonitePath)rml_libs/0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="FrooxEngine">
-      <HintPath>SymlinkedLibraries\FrooxEngine.dll</HintPath>
+      <HintPath>$(ResonitePath)Resonite_Data/Managed/FrooxEngine.dll</HintPath>
     </Reference>
-    <Reference Include="NeosModLoader">
-      <HintPath>SymlinkedLibraries\NeosModLoader.dll</HintPath>
+    <Reference Include="BaseX">
+      <HintPath>$(ResonitePath)Resonite_Data/Managed/Elements.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="CodeX">
+      <HintPath>$(ResonitePath)Resonite_Data/Managed/Elements.Assets.dll</HintPath>
+    </Reference>
+    <Reference Include="ResoniteModLoader">
+      <HintPath>$(ResonitePath)Libraries/ResoniteModLoader.dll</HintPath>
+    </Reference>
+    <Reference Include="System.ValueTuple">
+      <HintPath>$(ResonitePath)Resonite_Data/Managed/System.ValueTuple.dll</HintPath>
     </Reference>
   </ItemGroup>
 
-
-  <ItemGroup>
-    <PackageReference Include="System.Net.Http" Version="4.3.4" />
-  </ItemGroup>
-  
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(CopyToMods)'=='true'">
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ResonitePath)rml_mods" />
+    <Message Text="Copied $(TargetFileName) to $(ResonitePath)rml_mods" Importance="high" />
+  </Target>
 </Project>

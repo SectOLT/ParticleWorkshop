@@ -1,32 +1,28 @@
-using NeosModLoader;
+using Elements.Core;
 using FrooxEngine;
 using FrooxEngine.UIX;
-using BaseX;
+using ResoniteModLoader;
 
 namespace ParticleWorkshop
 {
-    public class ParticleWorkshop : NeosMod
+    public class ParticleWorkshop : ResoniteMod
     {
-        public override string Author => "Gareth48, Cyro, badhaloninja";
+        public override string Author => "Gareth48, Cyro, badhaloninja, TheJebForge";
         public override string Name => "ParticleWorkshop";
-        public override string Version => "1.0.0";
+        public override string Version => "1.1.0";
         
         static void ParticleAction(Slot s)
         {
             s.AttachComponent<DestroyOnUserLeave>().TargetUser.Target = Engine.Current.WorldManager.FocusedWorld.LocalUser;
             s.AttachComponent<DynamicVariableSpace>().SpaceName.Value = "ParticleEditor";
-            DynamicReferenceVariable<ParticleStyle>? ParticleStyleHolder = s.AttachComponent<DynamicReferenceVariable<ParticleStyle>>();
-            ParticleStyleHolder.VariableName.Value = "ParticleStyle";
+            DynamicReferenceVariable<ParticleStyle> particleStyleHolder = s.AttachComponent<DynamicReferenceVariable<ParticleStyle>>();
+            particleStyleHolder.VariableName.Value = "ParticleStyle";
 
             s.PersistentSelf = false;
 
             //Create new panel with basic layout
-            NeosCanvasPanel neosCanvasPanel = s.AttachComponent<NeosCanvasPanel>();
-            neosCanvasPanel.Panel.AddCloseButton();
-            neosCanvasPanel.Panel.TitleField.Value = "Particle Workshop";
-            neosCanvasPanel.CanvasSize = new float2(800f, 1024f);
-            neosCanvasPanel.PhysicalHeight = 0.5f;
-            UIBuilder ui = new UIBuilder(neosCanvasPanel.Canvas);
+            s.LocalScale *= 0.0009f;
+            UIBuilder ui = RadiantUI_Panel.SetupPanel(s, (LocaleString)"Particle Workshop (Mod)", new float2(800f, 1024f));
 
             // Set up layout
             ui.ScrollArea();
@@ -36,17 +32,17 @@ namespace ParticleWorkshop
             ui.Text("Particle Style");
 
             //build the UI for the particle style input
-            SyncMemberEditorBuilder.Build(ParticleStyleHolder.Reference, null, ParticleStyleHolder.GetSyncMemberFieldInfo("Reference"), ui);
+            SyncMemberEditorBuilder.Build(particleStyleHolder.Reference, null, particleStyleHolder.GetSyncMemberFieldInfo("Reference"), ui);
             
-            Slot? colorListSlot = ui.Empty("Color Keyframes List");
+            Slot colorListSlot = ui.Empty("Color Keyframes List");
             ui.Text("Color Keyframes List");
-            ValueGradientDriver<color>? colorValueGradient = colorListSlot.AttachComponent<ValueGradientDriver<color>>();
+            ValueGradientDriver<colorX> colorValueGradient = colorListSlot.AttachComponent<ValueGradientDriver<colorX>>();
             
-            colorValueGradient.Points.Changed += (IChangeable c) =>{
+            colorValueGradient.Points.Changed += (c) =>{
                 if(!colorValueGradient.Enabled){
                     return;
                 }
-                SyncList<ValueGradientDriver<color>.Point>? points = colorValueGradient.Points;
+                SyncList<ValueGradientDriver<colorX>.Point> points = colorValueGradient.Points;
                 if (points == null) return;
 
                 //Unity particles support a maximum of 8 keyframes, as a result we can't let any more points get added or it just breaks the array
@@ -56,21 +52,21 @@ namespace ParticleWorkshop
                     return;
                 }
 
-                SyncLinear<color>? colorList = ParticleStyleHolder.Reference.Target?.ColorOverLifetime;
+                SyncLinear<colorX> colorList = particleStyleHolder.Reference.Target?.ColorOverLifetime;
                 
                 if(colorList == null) 
                     return;
 
                 colorList.Clear();
-                for (int i = 0; i < points.Count; i++)
+                foreach (var t in points)
                 {
-                    colorList.InsertKey(points[i].Position, points[i].Value);
+                    colorList.InsertKey(t.Position, t.Value);
                 }
             };
 
-            ParticleStyleHolder.Reference.Changed += (c) => {
-                ISyncRef? r = c as ISyncRef;
-                ParticleStyle? target = r?.Target as ParticleStyle;
+            particleStyleHolder.Reference.Changed += (c) => {
+                ISyncRef r = c as ISyncRef;
+                ParticleStyle target = r?.Target as ParticleStyle;
                 
                 //This just works -- prevents a weird writeback issue we had early on
                 colorValueGradient.Enabled = false;
@@ -78,12 +74,11 @@ namespace ParticleWorkshop
                 if (target == null)
                     return;
 
-               target.UseColorOverLifetime.Value = true;
+                target.UseColorOverLifetime.Value = true;
 
-                SyncLinear<color>? colorKeyframes = target.ColorOverLifetime;
-                for (int i = 0; i < colorKeyframes.Count; i++)
+                SyncLinear<colorX> colorKeyframes = target.ColorOverLifetime;
+                foreach (var key in colorKeyframes)
                 {
-                    LinearKey<color> key = colorKeyframes[i];
                     colorValueGradient.AddPoint(key.time, key.value);
                 }
                 colorValueGradient.Enabled = true;
@@ -112,21 +107,21 @@ namespace ParticleWorkshop
                     return;
                 }
                 
-                SyncLinear<float>? alphaList = ParticleStyleHolder.Reference.Target?.AlphaOverLifetime;
+                SyncLinear<float> alphaList = particleStyleHolder.Reference.Target?.AlphaOverLifetime;
                 
                 if(alphaList == null) 
                     return;
 
                 alphaList.Clear();
-                for (int i = 0; i < alphaPoints.Count; i++)
+                foreach (var t in alphaPoints)
                 {
-                    alphaList.InsertKey(alphaPoints[i].Position, alphaPoints[i].Value);
+                    alphaList.InsertKey(t.Position, t.Value);
                 }
             };
 
-            ParticleStyleHolder.Reference.Changed += (c) => {
-                ISyncRef? r = c as ISyncRef;
-                ParticleStyle? target = r?.Target as ParticleStyle;
+            particleStyleHolder.Reference.Changed += (c) => {
+                ISyncRef r = c as ISyncRef;
+                ParticleStyle target = r?.Target as ParticleStyle;
                 
                 alphaValueGradient.Enabled = false;
                 alphaValueGradient.Points.Clear();
@@ -136,10 +131,9 @@ namespace ParticleWorkshop
 
                 target.UseColorOverLifetime.Value = true;
 
-                SyncLinear<float>? alphaKeyframes = target.AlphaOverLifetime;
-                for (int i = 0; i < alphaKeyframes.Count; i++)
+                SyncLinear<float> alphaKeyframes = target.AlphaOverLifetime;
+                foreach (var key in alphaKeyframes)
                 {
-                    LinearKey<float> key = alphaKeyframes[i];
                     alphaValueGradient.AddPoint(key.time, key.value);
                 }
                 alphaValueGradient.Enabled = true;
@@ -152,7 +146,7 @@ namespace ParticleWorkshop
         {
             //Harmony Patcher? I hardly even know her!
             Engine.Current.RunPostInit(() => {
-                DevCreateNewForm.AddAction("Editor", "Particle Workshop Editor", ParticleAction);
+                DevCreateNewForm.AddAction("Editor", "Particle Workshop Editor (Mod)", ParticleAction);
             });
         }
     }
