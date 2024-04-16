@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net462</TargetFramework>
+    <TargetFramework>net472</TargetFramework>
     <RootNamespace>ParticleWorkshop</RootNamespace>
     <AssemblyName>ParticleWorkshop</AssemblyName>
     <FileAlignment>512</FileAlignment>
@@ -15,7 +15,7 @@
     <CopyToMods Condition="'$(CopyToMods)'==''">true</CopyToMods>
     <DebugSymbols Condition="'$(Configuration)'=='Release'">false</DebugSymbols>
     <DebugType Condition="'$(Configuration)'=='Release'">None</DebugType>
-    <Version>1.1.0</Version>
+    <Version>1.1.1</Version>
     <Authors>Gareth48, Cyro, badhaloninja, TheJebForge</Authors>
     <PackageId>ParticleWorkshop</PackageId>
   </PropertyGroup>
