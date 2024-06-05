@@ -9,7 +9,7 @@ namespace ParticleWorkshop
     {
         public override string Author => "Gareth48, Cyro, badhaloninja, TheJebForge";
         public override string Name => "ParticleWorkshop";
-        public override string Version => "1.1.0";
+        public override string Version => "1.1.2";
         
         static void ParticleAction(Slot s)
         {
