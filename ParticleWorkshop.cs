@@ -10,6 +10,7 @@ namespace ParticleWorkshop
         public override string Author => "Gareth48, Cyro, badhaloninja, TheJebForge";
         public override string Name => "ParticleWorkshop";
         public override string Version => "1.1.2";
+        public override string Link => "https://github.com/TheJebForge/ParticleWorkshop/";
         
         static void ParticleAction(Slot s)
         {
